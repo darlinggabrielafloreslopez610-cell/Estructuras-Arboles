@@ -1,0 +1,112 @@
+class Palabra:
+    def __init__(self, texto, definicion):
+        self.texto = texto
+        self.definicion = definicion
+
+class NodoArbol:
+    def __init__(self, palabra):
+        self.palabra = palabra
+        self.izquierdo = None
+        self.derecho = None
+
+class DiccionarioInteligente:
+    def __init__(self):
+        self.raiz = None
+
+    def insertar(self, texto, definicion):
+        nueva = Palabra(texto, definicion)
+        if self.raiz is None:
+            self.raiz = NodoArbol(nueva)
+        else:
+            self._insertar(self.raiz, nueva)
+
+    def _insertar(self, nodo, palabra):
+        if palabra.texto < nodo.palabra.texto:
+            if nodo.izquierdo is None:
+                nodo.izquierdo = NodoArbol(palabra)
+            else:
+                self._insertar(nodo.izquierdo, palabra)
+        elif palabra.texto > nodo.palabra.texto:
+            if nodo.derecho is None:
+                nodo.derecho = NodoArbol(palabra)
+            else:
+                self._insertar(nodo.derecho, palabra)
+
+    def buscar(self, texto):
+        return self._buscar(self.raiz, texto)
+
+    def _buscar(self, nodo, texto):
+        if nodo is None:
+            return None
+        if texto == nodo.palabra.texto:
+            return nodo.palabra.definicion
+        elif texto < nodo.palabra.texto:
+            return self._buscar(nodo.izquierdo, texto)
+        else:
+            return self._buscar(nodo.derecho, texto)
+
+    def buscar_por_prefijo(self, prefijo):
+        resultados = []
+        self._buscar_prefijo(self.raiz, prefijo, resultados)
+        return resultados
+
+    def _buscar_prefijo(self, nodo, prefijo, resultados):
+        if nodo:
+            if nodo.palabra.texto.startswith(prefijo):
+                resultados.append((nodo.palabra.texto, nodo.palabra.definicion))
+            self._buscar_prefijo(nodo.izquierdo, prefijo, resultados)
+            self._buscar_prefijo(nodo.derecho, prefijo, resultados)
+
+    def mostrar_todo(self):
+        palabras = []
+        self._inorden(self.raiz, palabras)
+        return palabras
+
+    def _inorden(self, nodo, palabras):
+        if nodo:
+            self._inorden(nodo.izquierdo, palabras)
+            palabras.append((nodo.palabra.texto, nodo.palabra.definicion))
+            self._inorden(nodo.derecho, palabras)
+
+def menu():
+    diccionario = DiccionarioInteligente()
+    while True:
+        print("\n--- Diccionario Inteligente ---")
+        print("1. Insertar palabra")
+        print("2. Buscar palabra exacta")
+        print("3. Buscar por prefijo")
+        print("4. Mostrar todo el diccionario")
+        print("5. Salir")
+        opcion = input("Seleccione una opción: ")
+
+        if opcion == "1":
+            texto = input("Ingrese la palabra: ")
+            definicion = input("Ingrese la definición: ")
+            diccionario.insertar(texto, definicion)
+            print("Palabra insertada correctamente.")
+        elif opcion == "2":
+            texto = input("Ingrese la palabra a buscar: ")
+            resultado = diccionario.buscar(texto)
+            if resultado:
+                print(f"Definición: {resultado}")
+            else:
+                print("Palabra no encontrada.")
+        elif opcion == "3":
+            prefijo = input("Ingrese el prefijo: ")
+            resultados = diccionario.buscar_por_prefijo(prefijo)
+            if resultados:
+                for palabra, definicion in resultados:
+                    print(f"{palabra}: {definicion}")
+            else:
+                print("No se encontraron palabras con ese prefijo.")
+        elif opcion == "4":
+            palabras = diccionario.mostrar_todo()
+            for palabra, definicion in palabras:
+                print(f"{palabra}: {definicion}")
+        elif opcion == "5":
+            print("Saliendo del diccionario...")
+            break
+        else:
+            print("Opción inválida.")
+
+menu()
